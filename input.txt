@@ -1,0 +1,5 @@
+hw: 10.0
+Nmax: 5
+Xmax: 100.0
+NquadPosition: 500
+NquadMomentum: 100
