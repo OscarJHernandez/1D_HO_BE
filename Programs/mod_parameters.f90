@@ -10,6 +10,7 @@ integer:: NquadPosition ! Number of quadrature points in x
 integer:: NquadMomentum ! Number of quadrature points in p
 integer::st
 
+
 contains
 
 ! This subroutine reads in the input from a file
@@ -27,7 +28,6 @@ read(1,*) word,Xmax
 read(1,*) word,NquadPosition
 read(1,*) word,NquadMomentum
 close(1)
-
 
 ! Initialize v
 v = (0.5d0*hw*mn)/(hbarc**2)
