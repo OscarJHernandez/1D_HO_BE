@@ -14,8 +14,9 @@ real*8,parameter:: depsma=1.0d-18
 real*8:: al,ierr,iderr,dbe
 real(8),allocatable:: Rn_xi(:,:) ! (n,x)
 real(8),allocatable:: H(:,:) ! The Hamiltonian Matrix
+real(8),allocatable:: U(:,:) ! This matrix contains the Eigenvalues of H
 real(8),allocatable:: Eig(:) ! The Eigenvalues of te Matrix
-
+integer,parameter:: steps =1000  !! This is the number of steps used for the wavefunction
 
 contains
 
@@ -196,6 +197,80 @@ ALLOCATE(IPIV(n))
 DEALLOCATE(IPIV,work)
 RETURN
 END SUBROUTINE diagonalize
+
+! This subroutine will diagnalize our array
+subroutine solveSchrodinger()
+implicit none
+integer:: i
+
+allocate(U(0:Nmax,0:Nmax))
+U= H(:,:) ! We make a deep copy of the Hamiltonian Matrix
+
+! Now we diagonalize the Hamiltonian, and store Eigenvectors in U
+call diagonalize(U,Nmax+1,Eig)
+
+do i=1,10
+Print *, i,Eig(i)
+end do
+
+end subroutine
+
+! This will evaluate our ith eigenfunction Psi(x) at x,
+real(8) function psi(x,i)
+implicit none
+real(8)::x,s
+integer::i,j
+
+s=0.d0
+
+do j=0,Nmax
+s = s+U(j,i)*Rn(j,x)
+end do
+
+psi = s
+
+end function
+
+
+! This subroutine will then generate the wave functions for examination purposes
+! Phi(x,Ei) = Sum_{i} C_i Phi(n,x)
+! Generates the wavefunction in the region from a to b
+subroutine generateWavefunction(a,b,ni)
+implicit none
+integer::ni ! The ith eigenvector
+real(8)::a,b,xi
+integer::i
+!real(8):: Matrix(0:Nmax,0:Nmax)
+character(50):: f_out,f_out2,x1
+real(8)::dh
+
+character(len=8) :: fmt ! format descriptor
+fmt = '(I3.3)' ! an integer of width 5 with zeros at the left
+write(x1,fmt) ni ! converting integer to string using a 'internal file'
+
+f_out='EigenVec_'//trim(x1)//'.txt'
+open(unit = 2, file = f_out)
+
+
+!steps = integer((b-a)/dh)
+dh = abs(b-a)/dfloat(steps)
+
+do i=0,steps
+xi = a+dfloat(i)*dh
+write(2,*), xi,psi(xi,ni)
+end do
+
+close(2)
+
+! Print off the eigenvalues of the Eigenvectors
+f_out2 = 'EigenVectors.txt'
+open(unit=3, file = f_out2)
+do i=1,Nmax+1
+write(3,*) i,Eig(i)
+end do
+close(3)
+
+end subroutine
 
 
 

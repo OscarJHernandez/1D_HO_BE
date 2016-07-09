@@ -12,10 +12,10 @@ FCFLAGS += -Wall -fbounds-check
 LDFLAGS = -llapack
 
 # List of executables to be built within the package
-PROGRAMS = special_functions.f90 quadrature.f mod_parameters.f90 mod_potentials.f90 HO_basis.f90 mod_matrix_elements.f90 
+PROGRAMS = quadrature.f mod_parameters.f90 mod_potentials.f90 HO_basis.f90 mod_matrix_elements.f90 
 
 # The List of objects that will be built
-_OBJS= special_functions.o quadrature.o mod_parameters.o mod_potentials.o HO_basis.o mod_matrix_elements.o
+_OBJS= quadrature.o mod_parameters.o mod_potentials.o HO_basis.o mod_matrix_elements.o
 OBJS = $(patsubst %,Objects/%,$(_OBJS))
 #PROG= gen_H_FB
 PROG= main

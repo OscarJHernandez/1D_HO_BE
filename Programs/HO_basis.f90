@@ -6,7 +6,7 @@ use mod_parameters
 
 contains
 
-! This is the basis function
+! This is the basis function in the 1D-Harmonic Oscillator Basis
 real(8) function Rn(n,x)
 integer::n
 real(8)::x
@@ -14,8 +14,6 @@ real(8)::s1,s2
 
 ! This is the older implementation
 !s1 = Norm(n)*HermitePoly(n,dsqrt(2.d0*v)*x)
-
-!Rn = HermitePolyOrtho(n,dsqrt(2.d0*v)*x)*dExp(-0.5d0*x**2)
 
 ! This works for very Large Nmax
 s2 = HermitePolyOrtho(n,dsqrt(2.d0*v)*x)*((2.d0*v)**(0.25d0))
@@ -83,7 +81,6 @@ up = um0
 
 else
 	do ni =0,n-1
-	!up = 2.d0*x*dsqrt(2.d0/dfloat(ni))*um1-dsqrt(dfloat(ni-1)/dfloat(ni))*um2
 	up = x*dsqrt(2.d0/dfloat(ni+1))*um0-dsqrt(dfloat(ni)/dfloat(ni+1))*um1
 	um1 = um0
 	um0 = up 
