@@ -213,6 +213,12 @@ do i=1,10
 Print *, i,Eig(i)
 end do
 
+Print *,''
+
+do i=1,10
+Print *, i, dsqrt(2.d0*Eig(i)/(hw))
+end do
+
 end subroutine
 
 ! This will evaluate our ith eigenfunction Psi(x) at x,

@@ -17,9 +17,10 @@ import random
 
 # constants
 hbarc = 197.327
+xmax = 3000.0
 
 # We enumerate the Eigenvectors to be plotted
-Nmax = 2
+Nmax = 3
 data_array =[]
 Eig = []
 for i in range(0,Nmax):
@@ -65,5 +66,5 @@ def scattering(E,x):
 	# E*L = 2*Pi
 	return math.Sin((E*x)/hbarc)
 
-
+plt.xlim(-xmax,xmax)
 plt.show()	
