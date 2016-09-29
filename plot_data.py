@@ -12,6 +12,7 @@ from scipy import integrate
 from scipy.optimize import curve_fit
 from scipy import interpolate
 from scipy import stats
+from scipy.optimize import curve_fit
 import sys
 import random
 
@@ -20,9 +21,16 @@ hbarc = 197.327
 xmax = 3000.0
 
 # We enumerate the Eigenvectors to be plotted
-Nmax = 3
+Nmax = 9
 data_array =[]
 Eig = []
+
+mass =1.0
+hw = 2.0
+N = 100
+L = hbarc*math.sqrt(2.0*(N+2)/(mass*hw))
+
+
 for i in range(0,Nmax):
 	data_i = 'EigenVec_00'+str(i)+'.txt'
 	data_array.append(data_i)
@@ -36,7 +44,7 @@ for line in data:
 		Eig.append(Ei)	
 
 # First we will read in the u(r) and w(r) data for the desired potential.
-
+# We plot only the last one
 for i in range(0,Nmax):	
 	data = open(data_array[i], 'r')
 	x=[]
@@ -59,12 +67,81 @@ for i in range(0,Nmax):
 	plt.plot(x,psi,'r-',color=c)
 
 @np.vectorize
-def scattering(E,x):
-	#0 = c1*Sin[E*L]+c2*Cos[E*L]
-	#0 = -c1*Sin[E*L]+c2*Cos[E*L]
-	# => F[E,L]  = A1*Sin[E*L] 
-	# E*L = 2*Pi
-	return math.Sin((E*x)/hbarc)
+def scatteringSin(E,x):
+    p = math.sqrt(2.0*E*mass)
+    s = math.sin((p*x)/hbarc)
+    s = s*s
+    Norm = L - hbarc*(1.0/(2.0*p))*math.sin((2.0*p/(hbarc))*L)
+    s = s/Norm
+    return s
+    
+@np.vectorize
+def scatteringCos(E,x):
+    p = math.sqrt(2.0*E*mass)
+    c = math.cos((p*x)/hbarc) 
+    c=c*c   
+    Norm = L + hbarc*(1.0/(2.0*p))*math.sin((2.0*p/(hbarc))*L)
+    c = c/Norm
+    return c 
+    
+@np.vectorize
+def scatt_w_phase(E,delta,R,x):
+    p = math.sqrt(2.0*E*mass)
+    
+    if x>0:
+        c = math.cos(((p*x)/hbarc)+delta) # The scattering solution with phase shift
+    else:
+        c = math.cos(((p*x)/hbarc)-delta) # phase shift must change sign
+    c=c*c   
+    Norm = ((L-R)+(0.5*hbarc/p)*math.sin(2.0*(((p*L)/hbarc)+delta))-(0.5*hbarc/p)*math.sin(2.0*(((p*R)/hbarc)+delta))) 
+    
+    c = c/Norm
+    return c 
 
+# We want to calculate the phase shift!
+def phaseshift(i,R):
+    h0=0.0001
+    p = math.sqrt(2.0*Eig[i]*mass)
+    
+    data = open(data_array[i], 'r')
+    
+    x=[]
+    psi=[]
+	
+    for line in data:
+		line = line.strip()
+		columns = line.split()
+		xi = float(columns[0])
+		psi_xi = float(columns[1])
+		x.append(xi)
+		psi.append(psi_xi)
+    
+    # Now do a spline fit of the function
+    f = interpolate.interp1d(x, psi)
+    fp = (f(R+h0)-f(R))/h0
+    
+    delta = -((R*p)/(hbarc))-math.atan((fp/f(R))*(hbarc/p))
+    
+    #print delta
+    
+    
+    
+    return delta
+    
+    
+R = 100.0
+n=8
+delta = phaseshift(n,R)    
+print delta
+xvar = np.arange(x[0], x[len(x)-1], 0.1)
+#plt.plot(xvar,scatteringCos(Eig[0],xvar),'-g')
+#plt.plot(xvar,scatteringSin(Eig[1],xvar),'-g')
+
+#plt.plot(xvar,scatteringSin(Eig[1],xvar),'--r')
+plt.plot(xvar,scatt_w_phase(Eig[n],delta,R,xvar),'--g')
+
+
+#plt.plot(xvar,scatteringSin(Eig[2],xvar),'--r')
+#plt.plot(xvar,scatteringCos(Eig[3],xvar),'--r')
 plt.xlim(-xmax,xmax)
 plt.show()	
