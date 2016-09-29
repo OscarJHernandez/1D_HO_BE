@@ -8,8 +8,11 @@ implicit none
 
 !real(8),allocatable::daP(:),dbP(:),dp(:),dwP(:),eP(:)
 real(8),allocatable::daX(:),dbX(:),dx(:),dwX(:),eX(:)
+real(8),allocatable::daY(:),dbY(:),dy(:),dwY(:),eY(:)
+
 !integer,parameter:: ipolyMomentum=2 !  Legendre polynomial from 0 to 1 
 integer,parameter:: ipolyPosition=1 !  Legendre polynomial from -1 to 1 
+integer,parameter:: ipoly_Y=2 !  Legendre polynomial from 0 to 1 
 real*8,parameter:: depsma=1.0d-18
 real*8:: al,ierr,iderr,dbe
 real(8),allocatable:: Rn_xi(:,:) ! (n,x)
@@ -34,11 +37,12 @@ real(8)::xi
 ! Allocate the Gauss-Legendre quadrature routine
     !allocate(daP(NquadMomentum),dbP(NquadMomentum),dp(NquadMomentum),dwP(NquadMomentum),eP(NquadMomentum))
     allocate(daX(NquadPosition),dbX(NquadPosition),dx(NquadPosition),dwX(NquadPosition),eX(NquadPosition))
+    allocate(daY(NquadPosition),dbY(NquadPosition),dY(NquadPosition),dwY(NquadPosition),eY(NquadPosition))
     
     al = 0.d0
     
-    !call drecur(NquadMomentum,ipolyMomentum,al,dbe,daP,dbP,iderr)
-    !call dgauss(NquadMomentum,daP,dbP,depsma,dp,dwP,ierr,eP)
+    call drecur(NquadPosition,ipoly_Y,al,dbe,daY,dbY,iderr)
+    call dgauss(NquadPosition,daY,dbY,depsma,dy,dwY,ierr,eY)
     
     call drecur(NquadPosition,ipolyPosition,al,dbe,daX,dbX,iderr)
     call dgauss(NquadPosition,daX,dbX,depsma,dx,dwX,ierr,eX)

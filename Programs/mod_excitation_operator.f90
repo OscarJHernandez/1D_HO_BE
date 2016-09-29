@@ -100,4 +100,22 @@ deallocate(psi_tilde)
 end function
 
 
+! This function integrates ! <psi_tilde|psi_tilde>*gamma^2/pi
+! int_{0}^{1} f(x)dx 
+real(8) function integrate_response(n)
+implicit none
+integer:: n ! the eigen value of interest
+integer::i
+real(8)::s
+!real(8),allocatable::da(:),db(:),dxx(:),dw(:),e(:)
+!real*8,parameter:: depsma=1.0d-18
+!allocate(da(NquadPosition),dbX(NquadPosition),dx(NquadPosition),dwX(NquadPosition),eX(NquadPosition))
+do i=1, NquadPosition
+
+end do
+
+integrate_response = 0.d0
+end function
+
+
 end module

@@ -52,10 +52,10 @@ print *,'gamma0', s
 
 !================================
 ! Lorentz vector
-do i=2,Nmax
-s=Eig(i)-Eig(1)
-s = 1.5d0+0.01d0*dfloat(i)
-print *,s,build_H_matrix_complex(s,0.1d0)
+do i=1,4*Nmax+1
+s= Eig(2)-Eig(1)
+s = s+0.005d0*dfloat(i)
+print *,s,build_H_matrix_complex(s,0.01d0)
 end do
 !print *,psi_tilde(0)
 !print *,psi_tilde(10)
