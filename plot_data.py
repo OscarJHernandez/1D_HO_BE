@@ -8,6 +8,7 @@ import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import scipy.integrate
+from scipy.integrate import quad
 from scipy import integrate
 from scipy.optimize import curve_fit
 from scipy import interpolate
@@ -27,7 +28,7 @@ Eig = []
 
 mass =1.0
 hw = 2.0
-N = 100
+N = 50
 L = hbarc*math.sqrt(2.0*(N+2)/(mass*hw))
 
 
@@ -45,26 +46,26 @@ for line in data:
 
 # First we will read in the u(r) and w(r) data for the desired potential.
 # We plot only the last one
-for i in range(0,Nmax):	
-	data = open(data_array[i], 'r')
-	x=[]
-	psi=[]
+#for i in range(0,Nmax):	
+	#data = open(data_array[i], 'r')
+	#x=[]
+	#psi=[]
 	
-	for line in data:
-		line = line.strip()
-		columns = line.split()
-		xi = float(columns[0])
-		psi_xi = float(columns[1])
-		psi_xi = psi_xi**2
-		x.append(xi)
-		psi.append(psi_xi)
+	#for line in data:
+		#line = line.strip()
+		#columns = line.split()
+		#xi = float(columns[0])
+		#psi_xi = float(columns[1])
+		#psi_xi = psi_xi**2
+		#x.append(xi)
+		#psi.append(psi_xi)
 	
-	if i==0:
-		c = 'b'
-	else:
-		c = "#%06x" % random.randint(0, 0xFFFFFF)
+	#if i==0:
+		#c = 'b'
+	#else:
+		#c = "#%06x" % random.randint(0, 0xFFFFFF)
 	
-	plt.plot(x,psi,'r-',color=c)
+	#plt.plot(x,psi,'r-',color=c)
 
 @np.vectorize
 def scatteringSin(E,x):
@@ -101,7 +102,7 @@ def scatt_w_phase(E,delta,R,x):
 # We want to calculate the phase shift!
 def phaseshift(i,R):
     h0=0.0001
-    p = math.sqrt(2.0*Eig[i]*mass)
+    p = math.sqrt(2.0*abs(Eig[i])*mass)
     
     data = open(data_array[i], 'r')
     
@@ -124,21 +125,56 @@ def phaseshift(i,R):
     
     #print delta
     
+    print 1.0*(p/(hbarc))-math.pi*0.5
     
     
-    return delta
+    return delta,f,x
+    
+# \int_{-L}^{L} dx |psi(x)|^2 * x**p
+def operPsi0_Norm(i,p):
+    
+    data = open(data_array[i], 'r')
+    x=[]
+    psi=[]
+	
+    for line in data:
+		line = line.strip()
+		columns = line.split()
+		xi = float(columns[0])
+		psi_xi = float(columns[1])
+		x.append(xi)
+		psi.append(psi_xi)
+    
+    # Now do a spline fit of the function
+    f = interpolate.interp1d(x, psi)
+    
+    # The function to be integrated
+    def func(x):
+		return f(x)*f(x)*(x**p)
+    
+    
+    s=quad(func, -L, L)[0]
+    
+    print s
+    
+    return s   
+    
+
+
+print operPsi0_Norm(0,4)
     
     
 R = 100.0
-n=8
-delta = phaseshift(n,R)    
+n=0
+delta,psi_spline,x = phaseshift(n,R)    
 print delta
 xvar = np.arange(x[0], x[len(x)-1], 0.1)
 #plt.plot(xvar,scatteringCos(Eig[0],xvar),'-g')
 #plt.plot(xvar,scatteringSin(Eig[1],xvar),'-g')
 
-#plt.plot(xvar,scatteringSin(Eig[1],xvar),'--r')
-plt.plot(xvar,scatt_w_phase(Eig[n],delta,R,xvar),'--g')
+#plt.plot(xvar,scatteringSin(Eig[n],xvar),'--r')
+plt.plot(xvar,psi_spline(xvar)**2,'-b')
+#plt.plot(xvar,scatt_w_phase(Eig[n],delta,R,xvar),'--g')
 
 
 #plt.plot(xvar,scatteringSin(Eig[2],xvar),'--r')

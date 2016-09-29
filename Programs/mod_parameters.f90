@@ -7,7 +7,6 @@ real(8):: v
 real(8):: Xmax
 integer:: Nmax ! Max number of basis functions
 integer:: NquadPosition ! Number of quadrature points in x
-integer:: NquadMomentum ! Number of quadrature points in p
 integer::st
 
 
@@ -26,7 +25,6 @@ read(1,*) word,hw
 read(1,*) word,Nmax
 read(1,*) word,Xmax
 read(1,*) word,NquadPosition
-read(1,*) word,NquadMomentum
 close(1)
 
 ! Initialize v

@@ -1,5 +1,4 @@
 hw: 2.0
-Nmax: 100
-Xmax: 500.0
-NquadPosition: 500
-NquadMomentum: 100
+Nmax: 50
+Xmax: 600.0
+NquadPosition: 1500

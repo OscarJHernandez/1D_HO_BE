@@ -6,17 +6,21 @@ use mod_potentials
 implicit none
 
 
-real(8),allocatable::daP(:),dbP(:),dp(:),dwP(:),eP(:)
+!real(8),allocatable::daP(:),dbP(:),dp(:),dwP(:),eP(:)
 real(8),allocatable::daX(:),dbX(:),dx(:),dwX(:),eX(:)
-integer,parameter:: ipolyMomentum=2 !  Legendre polynomial from 0 to 1 
+!integer,parameter:: ipolyMomentum=2 !  Legendre polynomial from 0 to 1 
 integer,parameter:: ipolyPosition=1 !  Legendre polynomial from -1 to 1 
 real*8,parameter:: depsma=1.0d-18
 real*8:: al,ierr,iderr,dbe
 real(8),allocatable:: Rn_xi(:,:) ! (n,x)
 real(8),allocatable:: H(:,:) ! The Hamiltonian Matrix
 real(8),allocatable:: U(:,:) ! This matrix contains the Eigenvalues of H
+real(8),allocatable:: Udagger(:,:) ! The Transpose of the U matrix
 real(8),allocatable:: Eig(:) ! The Eigenvalues of te Matrix
+real(8),allocatable:: E0 ! The ground state energy
+real(8),allocatable:: psi0(:) ! The ground state Eigenvector
 integer,parameter:: steps =1000  !! This is the number of steps used for the wavefunction
+
 
 contains
 
@@ -28,13 +32,13 @@ integer:: i,ni
 real(8)::xi
 
 ! Allocate the Gauss-Legendre quadrature routine
-    allocate(daP(NquadMomentum),dbP(NquadMomentum),dp(NquadMomentum),dwP(NquadMomentum),eP(NquadMomentum))
+    !allocate(daP(NquadMomentum),dbP(NquadMomentum),dp(NquadMomentum),dwP(NquadMomentum),eP(NquadMomentum))
     allocate(daX(NquadPosition),dbX(NquadPosition),dx(NquadPosition),dwX(NquadPosition),eX(NquadPosition))
     
     al = 0.d0
     
-    call drecur(NquadMomentum,ipolyMomentum,al,dbe,daP,dbP,iderr)
-    call dgauss(NquadMomentum,daP,dbP,depsma,dp,dwP,ierr,eP)
+    !call drecur(NquadMomentum,ipolyMomentum,al,dbe,daP,dbP,iderr)
+    !call dgauss(NquadMomentum,daP,dbP,depsma,dp,dwP,ierr,eP)
     
     call drecur(NquadPosition,ipolyPosition,al,dbe,daX,dbX,iderr)
     call dgauss(NquadPosition,daX,dbX,depsma,dx,dwX,ierr,eX)
@@ -106,8 +110,31 @@ end do
 
 !print *, n1,n2,s
 Vn1n2 = s
-
 end function
+
+! Calculates <n1|x**p|n2> 
+real(8) function Operator_n1n2(n1,n2,p)
+implicit none
+integer::n1,n2
+real(8)::p
+real(8)::s,xi,f
+integer::i
+
+s=0.d0
+
+do i=1,NquadPosition
+xi = Xmax*dx(i)
+
+f = Rn_xi(n1,i)*Rn_xi(n2,i)*(xi**p)
+
+s = s +f*dwX(i)*Xmax
+end do
+
+Operator_n1n2 = s
+end function
+
+
+
 
 ! A subroutine meant for testing the subroutine
 subroutine testHermiteElements()
@@ -206,8 +233,25 @@ integer:: i
 allocate(U(0:Nmax,0:Nmax))
 U= H(:,:) ! We make a deep copy of the Hamiltonian Matrix
 
+! now we transpose u
+allocate(Udagger(0:Nmax,0:Nmax))
+Udagger = Transpose(U)
+
+
 ! Now we diagonalize the Hamiltonian, and store Eigenvectors in U
 call diagonalize(U,Nmax+1,Eig)
+
+!=================================================================
+! Store the ground state eigenvector
+allocate(psi0(0:Nmax))
+psi0(:)=0.d0
+
+do i=0,Nmax
+psi0(i) = U(i,0)
+end do
+
+E0 = Eig(1)
+!=================================================================
 
 do i=1,10
 Print *, i,Eig(i)

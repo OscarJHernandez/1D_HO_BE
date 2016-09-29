@@ -1,7 +1,7 @@
 ! This module contains the potentials that we will use
 module mod_potentials
 real(8),parameter:: L0 = 20.d0 ! fm
-real(8),parameter:: V0 = 10.d0 !200.d0 ! MeV
+real(8),parameter:: V0 = 10.0 ! 10.d0 !200.d0 ! MeV
 
 contains
 
