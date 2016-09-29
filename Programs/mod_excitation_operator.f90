@@ -58,6 +58,25 @@ gamma0(:) = 0.d0
 
 end subroutine
 
+! Calculates the overlap integral |<f|x^p|0>|^2
+real(8) function calculate_Overlap(n)
+implicit none
+integer::n
+integer::i,j 
+real(8)::s
+
+s = 0.d0
+do i=0,Nmax
+s = s + U(i,n)*gamma0(i)  
+end do
+
+s=s**2
+
+calculate_Overlap = s
+
+end function
+
+
 ! <psi_tilde|psi_tilde>*gamma^2/pi
 real(8) function build_H_matrix_complex(W,gam)
 implicit none

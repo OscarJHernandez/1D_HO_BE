@@ -33,7 +33,7 @@ call build_H_matrix()
 
 call solveSchrodinger()
 
-call excite_OpPsi0(1.d0)
+call excite_OpPsi0(0.d0)
 
 s=0.d0
 do i=0,Nmax
@@ -63,23 +63,28 @@ end do
 
 close(1)
 !=====================================================================
-! Integrate the response
-print *, 'w0',(Eig(2)-Eig(1))
-print *, integrate_response(2,0.1d0,0.1d0)
-print *, integrate_response(2,0.01d0,0.1d0)
-print *, integrate_response(2,0.001d0,0.1d0)
+print *,'overlap,1',calculate_Overlap(0)
+print *,'overlap,2',calculate_Overlap(1)
+print *,'overlap,3',calculate_Overlap(2)
+
+!====================================================================
+! Integrate the response around First contiuum eigenstate
+print *, 'w0',(Eig(1)-Eig(1))
+print *, integrate_response(1,0.1d0,0.1d0)
+print *, integrate_response(1,0.01d0,0.1d0)
+print *, integrate_response(1,0.001d0,0.1d0)
 
 print *, ''
-print *, integrate_response(2,0.001d0,1.d0)
-print *, integrate_response(2,0.001d0,0.5d0)
-print *, integrate_response(2,0.001d0,0.25d0)
-print *, integrate_response(2,0.001d0,0.125d0)
+print *, integrate_response(1,0.001d0,1.d0)
+print *, integrate_response(1,0.001d0,0.5d0)
+print *, integrate_response(1,0.001d0,0.25d0)
+print *, integrate_response(1,0.001d0,0.125d0)
 
 print *, ''
-print *, integrate_response(2,0.0005d0,0.5d0)
-print *, integrate_response(2,0.0005d0,0.25d0)
-print *, integrate_response(2,0.0005d0,0.125d0)
-print *, integrate_response(2,0.0005d0,0.1d0)
+print *, integrate_response(1,0.0005d0,0.5d0)
+print *, integrate_response(1,0.0005d0,0.25d0)
+print *, integrate_response(1,0.0005d0,0.125d0)
+print *, integrate_response(1,0.0005d0,0.1d0)
 !=====================================================================
 open(unit = 1, file = "response_2.txt")
 do i=1,200*Nmax+1
