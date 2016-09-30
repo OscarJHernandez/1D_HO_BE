@@ -53,12 +53,9 @@ print *,'gamma0', s
 !================================
 ! Lorentz vector
 open(unit = 1, file = "response_1.txt")
-
 do i=1,200*Nmax+1
-!s= Eig(2)-Eig(1)
-s = 0.0005d0*dfloat(i)
+s = 0.0005d0*dfloat(i-1)
 write(1,*) s, build_H_matrix_complex(s,0.01d0)
-
 end do
 
 close(1)
@@ -66,35 +63,72 @@ close(1)
 print *,'overlap,1',calculate_Overlap(0)
 print *,'overlap,2',calculate_Overlap(1)
 print *,'overlap,3',calculate_Overlap(2)
+print *,'overlap,3',calculate_Overlap(3)
+print *,'overlap,3',calculate_Overlap(4)
+print *,'overlap,3',calculate_Overlap(5)
 
 !====================================================================
 ! Integrate the response around First contiuum eigenstate
+print *, 'w0',(Eig(3)-Eig(1))
+print *, integrate_response(3,0.1d0,0.1d0)
+print *, integrate_response(3,0.01d0,0.1d0)
+print *, integrate_response(3,0.001d0,0.1d0)
+
+print *, ''
+print *, integrate_response(3,0.001d0,1.d0)
+print *, integrate_response(3,0.001d0,0.5d0)
+print *, integrate_response(3,0.001d0,0.25d0)
+print *, integrate_response(3,0.001d0,0.125d0)
+
+print *, ''
+print *, integrate_response(3,0.0005d0,0.5d0)
+print *, integrate_response(3,0.0005d0,0.25d0)
+print *, integrate_response(3,0.0005d0,0.125d0)
+print *, integrate_response(3,0.0005d0,0.1d0)
+
+!====================================================================
+
+! Integrate the response using the Gaussian kernel
 print *, 'w0',(Eig(1)-Eig(1))
-print *, integrate_response(1,0.1d0,0.1d0)
-print *, integrate_response(1,0.01d0,0.1d0)
-print *, integrate_response(1,0.001d0,0.1d0)
+print *, integrate_response_gauss(3,0.1d0,0.1d0)
+print *, integrate_response_gauss(3,0.01d0,0.1d0)
+print *, integrate_response_gauss(3,0.001d0,0.1d0)
 
 print *, ''
-print *, integrate_response(1,0.001d0,1.d0)
-print *, integrate_response(1,0.001d0,0.5d0)
-print *, integrate_response(1,0.001d0,0.25d0)
-print *, integrate_response(1,0.001d0,0.125d0)
+print *, integrate_response_gauss(3,0.001d0,1.d0)
+print *, integrate_response_gauss(3,0.001d0,0.5d0)
+print *, integrate_response_gauss(3,0.001d0,0.25d0)
+print *, integrate_response_gauss(3,0.001d0,0.125d0)
 
 print *, ''
-print *, integrate_response(1,0.0005d0,0.5d0)
-print *, integrate_response(1,0.0005d0,0.25d0)
-print *, integrate_response(1,0.0005d0,0.125d0)
-print *, integrate_response(1,0.0005d0,0.1d0)
+print *, integrate_response_gauss(3,0.0005d0,0.5d0)
+print *, integrate_response_gauss(3,0.0005d0,0.25d0)
+print *, integrate_response_gauss(3,0.0005d0,0.125d0)
+print *, integrate_response_gauss(3,0.0005d0,0.1d0)
+
+
 !=====================================================================
 open(unit = 1, file = "response_2.txt")
 do i=1,200*Nmax+1
 !s= Eig(2)-Eig(1)
-s = 0.0005d0*dfloat(i)
+s = 0.0005d0*dfloat(i-1)
 write(1,*) s, build_H_matrix_complex(s,0.001d0)
 end do
 
 close(1)
 !=====================================================================
+!=====================================================================
+open(unit = 1, file = "response_1_gauss.txt")
+do i=1,200*Nmax+1
+s = 0.0005d0*dfloat(i-1)
+write(1,*) s, build_H_matrix_gauss(s,0.001d0)
+end do
+
+close(1)
+!=====================================================================
+
+
+
 
 ! Here we print off the first few eigen_vectors
 do i=0,9

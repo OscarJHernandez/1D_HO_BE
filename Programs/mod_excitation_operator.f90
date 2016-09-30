@@ -9,8 +9,10 @@ implicit none
 real(8),allocatable::TransMatrix(:,:) ! This is the matrix that causes the G.S to be excited by an operator
 real(8),allocatable:: gamma0(:) ! |gamma0> = T[N,N]|0>
 
+real(8),allocatable::Hgauss(:,:)
 complex(8),allocatable::Hcomplex(:,:)
 complex(8),allocatable:: psi_tilde(:) ! The Lorentz vector
+real(8),allocatable:: psi_gauss(:) ! The Gaussian vector
 
 contains
 
@@ -54,6 +56,7 @@ gamma0(:) = 0.d0
 	   gamma0(j) = s
 	end do
 
+gamma0(:) = psi0(:)
 
 
 end subroutine
@@ -120,6 +123,53 @@ deallocate(psi_tilde)
 
 end function
 
+
+! <psi_tilde|psi_tilde>*gamma^2/pi
+! Gaussian kernel
+real(8) function build_H_matrix_gauss(W,sigma)
+implicit none
+real(8),allocatable:: G(:,:)
+real(8)::W,sigma
+integer::i,j
+real(8)::s,pi
+
+allocate(G(0:Nmax,0:Nmax))
+allocate(Hgauss(0:Nmax,0:Nmax))
+allocate(psi_gauss(0:Nmax))
+
+G(:,:)=0.d0
+
+do i=0,Nmax
+do j=0,Nmax
+    if(i==j) then
+       G(i,j) = dexp(-0.25d0*(1.d0/(sigma**2))*(Eig(i+1)-E0-W)**2)
+    end if
+end do
+end do
+
+Hgauss = MATMUL(Udagger,MATMUL(G,U))
+
+psi_gauss = MATMUL(Hgauss,psi0)
+
+! Calculate the psi_tilde norm
+s = 0.d0
+do i =0, Nmax
+s = s+psi_gauss(i)**2
+end do
+
+pi = datan(1.d0)*4.d0
+
+
+build_H_matrix_gauss = s*(1.d0/dsqrt(2.d0*pi*sigma**2))
+
+deallocate(G)
+deallocate(Hgauss)
+deallocate(psi_gauss)
+
+end function
+
+
+
 ! This function integrates ! <psi_tilde|psi_tilde>*gamma^2/pi
 ! int_{0}^{1} f(x)dx 
 ! int_{a}^{b} f(x) dx = \int_{0}^{1}f(m*x+a) dx
@@ -153,5 +203,33 @@ end do
 integrate_response = s
 end function
 
+
+! This function integrates ! <psi_tilde|psi_tilde>*gamma^2/pi
+! int_{0}^{1} f(x)dx 
+! int_{a}^{b} f(x) dx = \int_{0}^{1}f(m*x+a) dx
+! n=1,Nmax+1
+real(8) function integrate_response_gauss(n,sigma,de)
+implicit none
+integer:: n ! the eigen value of interest
+real(8):: sigma ! The sigma parameter 
+real(8):: de ! The epsilon paramter for the integration
+real(8)::a,b,y0
+integer::i
+real(8)::s,yi,m,wi
+
+a = (Eig(n)-Eig(1))-de
+b = (Eig(n)-Eig(1))+de
+y0 = 0.5d0*(b+a)
+m = 0.5d0*(b-a)
+
+s=0.d0
+do i=1, NquadPosition
+yi = dx(i)
+wi = m*yi+y0
+s= s+build_H_matrix_gauss(wi,sigma)*dwX(i)*((b-a)*0.5d0)
+end do
+
+integrate_response_gauss = s
+end function
 
 end module

@@ -128,9 +128,7 @@ s=0.d0
 
 do i=1,NquadPosition
 xi = Xmax*dx(i)
-
 f = Rn_xi(n1,i)*Rn_xi(n2,i)*(xi**p)
-
 s = s +f*dwX(i)*Xmax
 end do
 
