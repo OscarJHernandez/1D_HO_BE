@@ -128,7 +128,8 @@ s=0.d0
 
 do i=1,NquadPosition
 xi = Xmax*dx(i)
-f = Rn_xi(n1,i)*Rn_xi(n2,i)*(xi**p)
+f = Rn_xi(n1-1,i)*Rn_xi(n2-1,i)*(xi**p)
+!f=1.d0
 s = s +f*dwX(i)*Xmax
 end do
 
@@ -232,36 +233,38 @@ subroutine solveSchrodinger()
 implicit none
 integer:: i
 
-allocate(U(0:Nmax,0:Nmax))
-U= H(:,:) ! We make a deep copy of the Hamiltonian Matrix
-
-! now we transpose u
-allocate(Udagger(0:Nmax,0:Nmax))
-Udagger = Transpose(U)
+allocate(U(Nmax+1,Nmax+1))
+U(:,:)= H(:,:) ! We make a deep copy of the Hamiltonian Matrix
 
 
 ! Now we diagonalize the Hamiltonian, and store Eigenvectors in U
 call diagonalize(U,Nmax+1,Eig)
 
+! This should come after diagonalizing the matrix U
+! now we transpose u
+allocate(Udagger(Nmax+1,Nmax+1))
+Udagger = Transpose(U)
+
+
 !=================================================================
 ! Store the ground state eigenvector
-allocate(psi0(0:Nmax))
+allocate(psi0(Nmax+1))
 psi0(:)=0.d0
 
-do i=0,Nmax
-psi0(i) = U(i,0)
+do i=1,Nmax+1
+psi0(i) = U(i,1)
 end do
 
 E0 = Eig(1)
 !=================================================================
 
-do i=1,10
+do i=1,Nmax+1
 Print *, i,Eig(i)
 end do
 
 Print *,''
 
-do i=1,10
+do i=1,Nmax+1
 Print *, i, dsqrt(2.d0*Eig(i)/(hw))
 end do
 
@@ -275,7 +278,7 @@ integer::i,j
 
 s=0.d0
 
-do j=0,Nmax
+do j=1,Nmax+1
 s = s+U(j,i)*Rn(j,x)
 end do
 

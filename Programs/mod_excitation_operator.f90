@@ -9,8 +9,8 @@ implicit none
 real(8),allocatable::TransMatrix(:,:) ! This is the matrix that causes the G.S to be excited by an operator
 real(8),allocatable:: gamma0(:) ! |gamma0> = T[N,N]|0>
 
-real(8),allocatable::Hgauss(:,:)
-complex(8),allocatable::Hcomplex(:,:)
+!real(8),allocatable::Hgauss(:,:)
+!complex(8),allocatable::Hcomplex(:,:)
 complex(8),allocatable:: psi_tilde(:) ! The Lorentz vector
 real(8),allocatable:: psi_gauss(:) ! The Gaussian vector
 
@@ -41,22 +41,20 @@ implicit none
 integer ::i,j
 real(8)::s,p
 
-allocate(gamma0(0:Nmax))
+allocate(gamma0(Nmax+1))
 
 gamma0(:) = 0.d0
 
-	do j=0,Nmax
+	do j=1,Nmax+1
 	
 	   s=0.d0
 	   
-	   do i=0,Nmax
+	   do i=1,Nmax+1
 	   s = s+Operator_n1n2(i,j,p)*psi0(i)
 	   end do
 	   
 	   gamma0(j) = s
 	end do
-
-gamma0(:) = psi0(:)
 
 
 end subroutine
@@ -69,7 +67,7 @@ integer::i,j
 real(8)::s
 
 s = 0.d0
-do i=0,Nmax
+do i=1,Nmax+1
 s = s + U(i,n)*gamma0(i)  
 end do
 
@@ -87,30 +85,47 @@ Complex(8),allocatable:: G(:,:)
 real(8)::W,gam
 integer::i,j
 real(8)::s,pi
+Complex(8),allocatable:: Hcomplex(:,:)
 
-allocate(G(0:Nmax,0:Nmax))
-allocate(Hcomplex(0:Nmax,0:Nmax))
-allocate(psi_tilde(0:Nmax))
+allocate(G(Nmax+1,Nmax+1))
+allocate(Hcomplex(Nmax+1,Nmax+1))
+allocate(psi_tilde(Nmax+1))
 
 G(:,:)=0.d0
 
-do i=0,Nmax
-do j=0,Nmax
+do i=1,Nmax+1
+do j=1,Nmax+1
     if(i==j) then
-       G(i,j) = ((Eig(i+1)-E0-W)- DCMPLX(0.d0, gam))**(-1)
+      ! G(i,j) = ((Eig(i+1)-E0-W)- DCMPLX(0.d0, gam))**(-1)
+       G(i,j) = ((Eig(i)-W)- DCMPLX(0.d0, gam))**(-1)
     end if
 end do
 end do
 
-Hcomplex = MATMUL(Udagger,MATMUL(G,U))
+! initialize Hcomplex
+Hcomplex(:,:) = 0.d0
 
-psi_tilde = MATMUL(Hcomplex,psi0)
+!========================================
+! H = UD U_dagger
+!Hcomplex = MATMUL(U,MATMUL(G,Udagger))
+!========================================
+
+! This is the complex matrix, now multiply against oper|0>
+Hcomplex = MATMUL(U,MATMUL(G,Udagger))
+
+psi_tilde = MATMUL(Hcomplex,gamma0)
 
 ! Calculate the psi_tilde norm
 s = 0.d0
-do i =0, Nmax
+do i =1, Nmax+1
 s = s+REALPART(psi_tilde(i)*dCONJG(psi_tilde(i)))
+!s = s+psi_tilde(i)**2 !dCONJG(psi_tilde(i))
 end do
+
+!print *, '<psi tilde| psi tilde>', s
+
+
+!call exit()
 
 pi = datan(1.d0)*4.d0
 
@@ -132,28 +147,29 @@ real(8),allocatable:: G(:,:)
 real(8)::W,sigma
 integer::i,j
 real(8)::s,pi
+real(8),allocatable:: Hgauss(:,:)
 
-allocate(G(0:Nmax,0:Nmax))
-allocate(Hgauss(0:Nmax,0:Nmax))
-allocate(psi_gauss(0:Nmax))
+allocate(G(Nmax+1,Nmax+1))
+allocate(Hgauss(Nmax+1,Nmax+1))
+allocate(psi_gauss(Nmax+1))
 
 G(:,:)=0.d0
 
-do i=0,Nmax
-do j=0,Nmax
+do i=1,Nmax+1
+do j=1,Nmax+1
     if(i==j) then
-       G(i,j) = dexp(-0.25d0*(1.d0/(sigma**2))*(Eig(i+1)-E0-W)**2)
+      ! G(i,j) = dexp(-0.25d0*(1.d0/(sigma**2))*(Eig(i+1)-E0-W)**2)
+       G(i,j) = dexp(-0.25d0*(1.d0/(sigma**2))*(Eig(i)-W)**2)
     end if
 end do
 end do
 
-Hgauss = MATMUL(Udagger,MATMUL(G,U))
-
-psi_gauss = MATMUL(Hgauss,psi0)
+Hgauss = MATMUL(U,MATMUL(G,Udagger))
+psi_gauss = MATMUL(Hgauss,gamma0) ! |psi'> = Exp{} Oper|0>
 
 ! Calculate the psi_tilde norm
 s = 0.d0
-do i =0, Nmax
+do i =1, Nmax+1
 s = s+psi_gauss(i)**2
 end do
 
@@ -186,8 +202,10 @@ real(8)::s,yi,m,wi
 !real(8),allocatable::da(:),db(:),dxx(:),dw(:),e(:)
 !real*8,parameter:: depsma=1.0d-18
 !allocate(da(NquadPosition),dbX(NquadPosition),dx(NquadPosition),dwX(NquadPosition),eX(NquadPosition))
-a = (Eig(n)-Eig(1))-de
-b = (Eig(n)-Eig(1))+de
+!a = (Eig(n)-Eig(1))-de
+!b = (Eig(n)-Eig(1))+de
+a = Eig(n)-de
+b = Eig(n)+de
 y0 = 0.5d0*(b+a)
 m = 0.5d0*(b-a)
 
@@ -217,8 +235,10 @@ real(8)::a,b,y0
 integer::i
 real(8)::s,yi,m,wi
 
-a = (Eig(n)-Eig(1))-de
-b = (Eig(n)-Eig(1))+de
+!a = (Eig(n)-Eig(1))-de
+!b = (Eig(n)-Eig(1))+de
+a = Eig(n)-de
+b = Eig(n)+de
 y0 = 0.5d0*(b+a)
 m = 0.5d0*(b-a)
 

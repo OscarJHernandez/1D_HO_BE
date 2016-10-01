@@ -6,6 +6,7 @@ use mod_excitation_operator
 implicit none
 integer::i
 real(8)::s
+integer,parameter::N_overlap=2
 
 ! Read the input file
 call readInput()
@@ -33,10 +34,10 @@ call build_H_matrix()
 
 call solveSchrodinger()
 
-call excite_OpPsi0(0.d0)
+call excite_OpPsi0(1.d0)
 
 s=0.d0
-do i=0,Nmax
+do i=1,Nmax+1
 s = s+psi0(i)**2
 end do
 
@@ -44,7 +45,7 @@ print *,'psi0', s
 
 
 s=0.d0
-do i=0,Nmax
+do i=1,Nmax+1
 s = s+gamma0(i)**2
 end do
 
@@ -60,51 +61,49 @@ end do
 
 close(1)
 !=====================================================================
-print *,'overlap,1',calculate_Overlap(0)
-print *,'overlap,2',calculate_Overlap(1)
-print *,'overlap,3',calculate_Overlap(2)
+print *,'overlap,1',calculate_Overlap(1)
+print *,'overlap,2',calculate_Overlap(2)
 print *,'overlap,3',calculate_Overlap(3)
-print *,'overlap,3',calculate_Overlap(4)
-print *,'overlap,3',calculate_Overlap(5)
+print *,'overlap,4',calculate_Overlap(4)
+print *,'overlap,5',calculate_Overlap(5)
+print *,'overlap,6',calculate_Overlap(6)
 
 !====================================================================
 ! Integrate the response around First contiuum eigenstate
-print *, 'w0',(Eig(3)-Eig(1))
-print *, integrate_response(3,0.1d0,0.1d0)
-print *, integrate_response(3,0.01d0,0.1d0)
-print *, integrate_response(3,0.001d0,0.1d0)
+print *, ''
+print *, 'Lorentz Kernel'
+print *, 'w0',Eig(3)
+print *, integrate_response(N_overlap,0.1d0,0.1d0)
+print *, integrate_response(N_overlap,0.01d0,0.1d0)
+print *, integrate_response(N_overlap,0.001d0,0.1d0)
 
 print *, ''
-print *, integrate_response(3,0.001d0,1.d0)
-print *, integrate_response(3,0.001d0,0.5d0)
-print *, integrate_response(3,0.001d0,0.25d0)
-print *, integrate_response(3,0.001d0,0.125d0)
+print *, integrate_response(N_overlap,0.0000001d0,0.00008d0)
+print *, integrate_response(N_overlap,0.0000001d0,0.0001d0)
+print *, integrate_response(N_overlap,0.0000001d0,0.0002d0)
+print *, integrate_response(N_overlap,0.0000001d0,0.00005d0)
+print *, integrate_response(N_overlap,0.0000001d0,0.000025d0)
 
-print *, ''
-print *, integrate_response(3,0.0005d0,0.5d0)
-print *, integrate_response(3,0.0005d0,0.25d0)
-print *, integrate_response(3,0.0005d0,0.125d0)
-print *, integrate_response(3,0.0005d0,0.1d0)
 
 !====================================================================
 
 ! Integrate the response using the Gaussian kernel
-print *, 'w0',(Eig(1)-Eig(1))
-print *, integrate_response_gauss(3,0.1d0,0.1d0)
-print *, integrate_response_gauss(3,0.01d0,0.1d0)
-print *, integrate_response_gauss(3,0.001d0,0.1d0)
+print *,''
+print *, 'Gaussian Kernel'
+print *, 'w0',Eig(3)
+print *, integrate_response_gauss(N_overlap,0.1d0,0.1d0)
+print *, integrate_response_gauss(N_overlap,0.01d0,0.1d0)
+print *, integrate_response_gauss(N_overlap,0.001d0,0.1d0)
 
 print *, ''
-print *, integrate_response_gauss(3,0.001d0,1.d0)
-print *, integrate_response_gauss(3,0.001d0,0.5d0)
-print *, integrate_response_gauss(3,0.001d0,0.25d0)
-print *, integrate_response_gauss(3,0.001d0,0.125d0)
+print *, integrate_response_gauss(N_overlap,0.001d0,1.d0)
+print *, integrate_response_gauss(N_overlap,0.001d0,0.5d0)
+print *, integrate_response_gauss(N_overlap,0.001d0,0.25d0)
+print *, integrate_response_gauss(N_overlap,0.001d0,0.125d0)
+print *, integrate_response_gauss(N_overlap,0.001d0,0.0625d0)
+print *, integrate_response_gauss(N_overlap,0.001d0,0.03125d0)
+print *, integrate_response_gauss(N_overlap,0.001d0,0.015625d0)
 
-print *, ''
-print *, integrate_response_gauss(3,0.0005d0,0.5d0)
-print *, integrate_response_gauss(3,0.0005d0,0.25d0)
-print *, integrate_response_gauss(3,0.0005d0,0.125d0)
-print *, integrate_response_gauss(3,0.0005d0,0.1d0)
 
 
 !=====================================================================
@@ -131,7 +130,7 @@ close(1)
 
 
 ! Here we print off the first few eigen_vectors
-do i=0,9
+do i=1,9
 call generateWavefunction(-2000.d0,2000.d0,i)
 end do
 
